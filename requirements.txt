@@ -1,0 +1,7 @@
+flask>=2.2.5
+waitress>=2.1.2
+pyodbc>=4.0.34
+pandas>=2.0.3
+openai>=1.0.0
+sqlparse>=0.4.3
+python-dotenv>=1.0.0

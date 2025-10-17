@@ -1,0 +1,43 @@
+# Python cache 
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+python/
+.python/
+
+# Environment and config
+.env
+*.env
+*.pem
+*.pfx
+*.key
+*.crt
+*.json
+*.sqlite
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Data, models, and checkpoints
+*.csv
+*.xlsx
+*.pkl
+*.pt
+*.h5
+*.onnx
+*.joblib
+
+# IDE / OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

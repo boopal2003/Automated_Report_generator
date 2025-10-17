@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Report Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #475569;
+      --success-color: #10b981;
+      --background: #f8f9fc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+    body {
+      background: var(--background);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    .navbar {
+      background: var(--card-bg) !important;
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 0;
+    }
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color) !important;
+      letter-spacing: -0.5px;
+    }
+    .container-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .query-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 2rem;
+    }
+    .form-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .form-control, .form-select {
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.875rem 1rem;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      outline: none;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-outline-secondary {
+      border: 2px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .btn-outline-secondary:hover {
+      background: var(--background);
+      border-color: var(--secondary-color);
+      color: var(--text-primary);
+    }
+    .btn-outline-success {
+      border: 2px solid var(--success-color);
+      color: var(--success-color);
+    }
+    .btn-outline-success:hover {
+      background: var(--success-color);
+      color: white;
+    }
+    .btn-outline-info {
+      border: 2px solid #0ea5e9;
+      color: #0ea5e9;
+    }
+    .btn-outline-info:hover {
+      background: #0ea5e9;
+      color: white;
+    }
+    .section-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .summary-content {
+      line-height: 1.8;
+      color: var(--text-primary);
+      font-size: 1.05rem;
+    }
+    .summary-content h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+    .summary-content p {
+      margin-bottom: 1rem;
+    }
+    .summary-content strong {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .summary-content ul {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 1rem;
+    }
+    .summary-content ul li {
+      padding: 0.75rem 0 0.75rem 2rem;
+      position: relative;
+      border-left: 3px solid var(--primary-color);
+      margin-left: 0.5rem;
+      margin-bottom: 0.75rem;
+      background: var(--background);
+      border-radius: 0 8px 8px 0;
+    }
+    .summary-collapsed {
+      max-height: 300px;
+      overflow: hidden;
+      position: relative;
+    }
+    .summary-collapsed::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: linear-gradient(to bottom, transparent, var(--card-bg));
+    }
+    .summary-expanded {
+      max-height: none !important;
+    }
+    .summary-expanded::after {
+      display: none;
+    }
+    .metadata-bar {
+      display: flex;
+      gap: 2rem;
+      padding: 1rem;
+      background: var(--background);
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    .metadata-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .metadata-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    .metadata-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .chart-type-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .chart-type-card:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .chart-type-card.active {
+      border-color: var(--primary-color);
+      background: rgba(37, 99, 235, 0.05);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .chart-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .chart-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+    .chart-type-card:hover .chart-name {
+      color: var(--primary-color);
+    }
+    .chart-controls {
+      background: var(--background);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .chart-container {
+      position: relative;
+      height: 400px;
+      padding: 1rem;
+      background: var(--background);
+      border-radius: 8px;
+    }
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .table {
+      margin: 0;
+    }
+    .table thead th {
+      background: var(--background);
+      color: var(--text-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      letter-spacing: 0.5px;
+      padding: 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+    .table tbody td {
+      padding: 1rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .table tbody tr:hover {
+      background: var(--background);
+    }
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 0.5rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .alert {
+      border-radius: 8px;
+      border: none;
+      padding: 1rem 1.25rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-main">
+      <a class="navbar-brand" href="/">Report Generator</a>
+      <div class="ms-auto text-muted small">Workflow Reports</div>
+    </div>
+  </nav>
+  <main class="container-main">
+    <div class="query-card">
+      <form id="queryForm" method="post" action="/query">
+        <label for="user_query" class="form-label">Ask a question</label>
+        <textarea id="user_query" name="user_query" class="form-control" rows="4" placeholder="e.g. Show package counts by status for the last 7 days"></textarea>
+        <div class="mt-3 d-flex gap-2 flex-wrap">
+          <button id="generateBtn" type="submit" class="btn btn-primary">Generate Report</button>
+          <button id="clearBtn" type="button" class="btn btn-outline-secondary">Clear</button>
+          <a id="downloadCsvBtn" class="btn btn-outline-success d-none" href="#" role="button">Download CSV</a>
+        </div>
+      </form>
+    </div>
+    <div id="resultsArea">
+      <div class="section-card empty-state">
+        <div class="empty-state-icon">📊</div>
+        <h3>Ready to Generate Reports</h3>
+        <p>Enter a natural language question above and click "Generate Report" to get started.</p>
+      </div>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function(){
+      let currentRecords = [];
+      let currentChartType = 'bar';
+      
+      function el(id){return document.getElementById(id)}
+      
+      function escapeHtml(unsafe){
+        if(unsafe===null||unsafe===undefined)return '';
+        return String(unsafe).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
+      }
+      
+      function renderResult(result){
+        if(!result||!result.ok)return;
+        const summaryHtmlEl=el('summaryHtml');
+        if(!summaryHtmlEl){console.error('summaryHtml element not found');return}
+        try{
+          let md=result.summary||'';
+          md=md.replace(/^#+\s*Executive\s+Summary\s*\n/im,'');
+          md=md.replace(/##?\s*Provenance\s+Appendix[\s\S]*$/im,'');
+          md=md.replace(/##?\s*Provenance[\s\S]*$/im,'');
+          md=md.replace(/\*\*Provenance\s+Appendix\*\*[\s\S]*$/im,'');
+          summaryHtmlEl.innerHTML=marked.parse(md);
+        }catch(err){
+          console.error('Markdown parsing failed:',err);
+          summaryHtmlEl.textContent=result.summary||'';
+        }
+        const rowsCountEl=el('rowsCount');
+        const execTimeEl=el('execTime');
+        if(result.meta){
+          if(result.meta.row_count!==undefined&&rowsCountEl){
+            rowsCountEl.textContent=result.meta.row_count;
+          }
+          if(result.meta.exec_time_secs!==undefined&&execTimeEl){
+            execTimeEl.textContent=result.meta.exec_time_secs.toFixed(2)+'s';
+          }
+        }
+        const records=result.df_records||[];
+        currentRecords=records;
+        renderTable(records);
+        if(records&&records.length){
+          setupCSVDownload('report.csv',records);
+          setupChartControls(records);
+          el('chartSection').style.display='';
+        }else{
+          el('chartSection').style.display='none';
+        }
+      }
+      
+      function renderTable(records){
+        const thead=el('resultsThead');
+        const tbody=el('resultsTbody');
+        if(!records||!records.length){
+          thead.innerHTML='';
+          tbody.innerHTML='<tr><td colspan="100" class="text-center">No data available</td></tr>';
+          return;
+        }
+        const keys=Object.keys(records[0]);
+        thead.innerHTML='<tr>'+keys.map(k=>`<th>${escapeHtml(k)}</th>`).join('')+'</tr>';
+        tbody.innerHTML=records.map(r=>'<tr>'+keys.map(k=>`<td>${escapeHtml(r[k])}</td>`).join('')+'</tr>').join('');
+      }
+      
+      function setupCSVDownload(filename,rows){
+        if(!rows||!rows.length)return;
+        const keys=Object.keys(rows[0]);
+        const csv=[keys.join(',')].concat(rows.map(r=>keys.map(k=>{
+          const v=r[k]===null||r[k]===undefined?'':String(r[k]).replace(/"/g,'""');
+          return `"${v}"`;
+        }).join(','))).join('\r\n');
+        const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+        const url=URL.createObjectURL(blob);
+        const btn=el('downloadCsvBtn');
+        btn.href=url;
+        btn.download=filename;
+        btn.classList.remove('d-none');
+      }
+      
+      function setupChartControls(records){
+        if(!records||!records.length)return;
+        const cols=Object.keys(records[0]);
+        const xAxisSelect=el('xAxisSelect');
+        const yAxisSelect=el('yAxisSelect');
+        xAxisSelect.innerHTML='<option value="">Select X-Axis</option>'+cols.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+        yAxisSelect.innerHTML='<option value="">Select Y-Axis</option>'+cols.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+        
+        const typeScores={};
+        for(const c of cols){
+          typeScores[c]={num:0,str:0};
+        }
+        for(let i=0;i<Math.min(records.length,50);i++){
+          const r=records[i];
+          for(const c of cols){
+            const v=r[c];
+            if(v===null||v===undefined)continue;
+            if(typeof v==='number'){
+              typeScores[c].num++;
+            }else if(!isNaN(Number(v))&&String(v).trim()!==''){
+              typeScores[c].num++;
+            }else{
+              typeScores[c].str++;
+            }
+          }
+        }
+        const categorical=cols.find(c=>typeScores[c].str>0)||null;
+        const numeric=cols.find(c=>typeScores[c].num>0&&c!==categorical)||null;
+        if(categorical&&numeric){
+          xAxisSelect.value=categorical;
+          yAxisSelect.value=numeric;
+          updateChart();
+        }
+      }
+      
+      function updateChart(){
+        const xAxis=el('xAxisSelect').value;
+        const yAxis=el('yAxisSelect').value;
+        if(!xAxis||!yAxis||!currentRecords.length){
+          return;
+        }
+        const agg={};
+        for(const r of currentRecords){
+          const k=r[xAxis]===null||r[xAxis]===undefined?'NULL':String(r[xAxis]);
+          const nv=r[yAxis]===null||r[yAxis]===undefined?0:Number(r[yAxis])||0;
+          if(!agg[k])agg[k]=0;
+          agg[k]+=nv;
+        }
+        const entries=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,15);
+        const chartSpec={
+          categorical:xAxis,
+          numeric:yAxis,
+          labels:entries.map(e=>e[0]),
+          values:entries.map(e=>e[1])
+        };
+        renderChart(currentChartType,chartSpec);
+      }
+      
+      function renderChart(chartType,chartSpec){
+        const canvas=el('autoChart');
+        if(!canvas){console.error('Chart canvas not found');return}
+        const ctx=canvas.getContext('2d');
+        if(window._autoChart){
+          try{window._autoChart.destroy()}catch(e){}
+        }
+        const colors=['rgba(37, 99, 235, 0.8)','rgba(16, 185, 129, 0.8)','rgba(245, 158, 11, 0.8)','rgba(239, 68, 68, 0.8)','rgba(139, 92, 246, 0.8)','rgba(236, 72, 153, 0.8)','rgba(6, 182, 212, 0.8)','rgba(132, 204, 22, 0.8)'];
+        let chartConfig={
+          type:chartType,
+          data:{
+            labels:chartSpec.labels,
+            datasets:[{
+              label:`${chartSpec.numeric} by ${chartSpec.categorical}`,
+              data:chartSpec.values,
+              backgroundColor:chartType==='pie'||chartType==='doughnut'?colors.slice(0,chartSpec.labels.length):'rgba(37, 99, 235, 0.8)',
+              borderColor:chartType==='pie'||chartType==='doughnut'?colors.slice(0,chartSpec.labels.length).map(c=>c.replace('0.8','1')):'rgba(37, 99, 235, 1)',
+              borderWidth:chartType==='line'?3:chartType==='pie'||chartType==='doughnut'?2:0,
+              borderRadius:chartType==='bar'?8:0,
+              barPercentage:0.7,
+              fill:chartType==='line'?false:undefined,
+              tension:chartType==='line'?0.4:undefined,
+              pointRadius:chartType==='line'?4:undefined,
+              pointHoverRadius:chartType==='line'?6:undefined
+            }]
+          },
+          options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+              legend:{display:chartType==='pie'||chartType==='doughnut',position:'right'},
+              tooltip:{backgroundColor:'rgba(0, 0, 0, 0.8)',padding:12,cornerRadius:8}
+            },
+            scales:chartType==='pie'||chartType==='doughnut'?{}:{
+              x:{grid:{display:false},ticks:{maxRotation:45,minRotation:0}},
+              y:{beginAtZero:true,grid:{color:'rgba(0, 0, 0, 0.05)'}}
+            }
+          }
+        };
+        window._autoChart=new Chart(ctx,chartConfig);
+      }
+      
+      function downloadChart(){
+        const canvas=el('autoChart');
+        if(!canvas)return;
+        const url=canvas.toDataURL('image/png');
+        const link=document.createElement('a');
+        link.download='chart.png';
+        link.href=url;
+        link.click();
+      }
+      
+      el('clearBtn').addEventListener('click',()=>{
+        el('user_query').value='';
+        const resultsArea=el('resultsArea');
+        resultsArea.innerHTML=`<div class="section-card empty-state"><div class="empty-state-icon">📊</div><h3>Ready to Generate Reports</h3><p>Enter a natural language question above and click "Generate Report" to get started.</p></div>`;
+        el('downloadCsvBtn').classList.add('d-none');
+        currentRecords=[];
+        history.replaceState({},document.title,window.location.pathname);
+      });
+      
+      const form=el('queryForm');
+      form.addEventListener('submit',async function(ev){
+        ev.preventDefault();
+        const q=el('user_query').value||'';
+        if(!q.trim()){return}
+        const genBtn=el('generateBtn');
+        const originalText=genBtn.innerHTML;
+        genBtn.disabled=true;
+        genBtn.innerHTML='Generating<span class="loading-spinner"></span>';
+        try{
+          const resp=await fetch('/api/query',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Accept':'application/json'},
+            body:JSON.stringify({nl_query:q})
+          });
+          const json=await resp.json();
+          if(!resp.ok||!json.ok){
+            console.error('Query error:',json.error||resp.statusText);
+            const resultsArea=el('resultsArea');
+            if(resultsArea){
+              resultsArea.innerHTML=`<div class="section-card"><div class="alert alert-danger"><strong>Error:</strong> ${escapeHtml(json.error||'Query failed. Please try again.')}</div></div>`;
+            }
+          }else{
+            const resultData=json.result||json;
+            const resultsArea=el('resultsArea');
+            if(resultsArea){
+              resultsArea.innerHTML=`
+                <div class="section-card">
+                  <div class="section-header">
+                    <h2 class="section-title">Summary</h2>
+                    <button id="expandSummary" class="btn btn-sm btn-outline-secondary">Expand</button>
+                  </div>
+                  <div id="summaryContainer" class="summary-content summary-collapsed">
+                    <div id="summaryHtml"></div>
+                  </div>
+                  <div class="metadata-bar">
+                    <div class="metadata-item">
+                      <span class="metadata-label">Rows Returned</span>
+                      <span class="metadata-value" id="rowsCount">0</span>
+                    </div>
+                    <div class="metadata-item">
+                      <span class="metadata-label">Execution Time</span>
+                      <span class="metadata-value" id="execTime">0.00s</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="section-card">
+                  <div class="section-header">
+                    <h2 class="section-title">Detailed Results</h2>
+                  </div>
+                  <div class="table-container">
+                    <table id="resultsTable" class="table">
+                      <thead id="resultsThead"></thead>
+                      <tbody id="resultsTbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div id="chartSection" class="section-card">
+                  <div class="section-header">
+                    <h2 class="section-title">Visualization</h2>
+                  </div>
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                      <div class="chart-type-card active" data-chart-type="bar">
+                        <div class="chart-icon">📊</div>
+                        <div class="chart-name">Bar Chart</div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="chart-type-card" data-chart-type="line">
+                        <div class="chart-icon">📈</div>
+                        <div class="chart-name">Line Chart</div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="chart-type-card" data-chart-type="pie">
+                        <div class="chart-icon">🥧</div>
+                        <div class="chart-name">Pie Chart</div>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="chart-type-card" data-chart-type="doughnut">
+                        <div class="chart-icon">🍩</div>
+                        <div class="chart-name">Doughnut Chart</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="chart-controls">
+                    <div class="row g-3">
+                      <div class="col-md-5">
+                        <label class="form-label">X-Axis (Category)</label>
+                        <select id="xAxisSelect" class="form-select"></select>
+                      </div>
+                      <div class="col-md-5">
+                        <label class="form-label">Y-Axis (Value)</label>
+                        <select id="yAxisSelect" class="form-select"></select>
+                      </div>
+                      <div class="col-md-2 d-flex align-items-end">
+                        <button id="downloadChartBtn" class="btn btn-outline-info w-100">Download Chart</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="chart-container">
+                    <canvas id="autoChart"></canvas>
+                  </div>
+                </div>
+              `;
+              const expandBtn=el('expandSummary');
+              if(expandBtn){
+                expandBtn.addEventListener('click',function(){
+                  const container=el('summaryContainer');
+                  const btn=this;
+                  if(container.classList.contains('summary-collapsed')){
+                    container.classList.remove('summary-collapsed');
+                    container.classList.add('summary-expanded');
+                    btn.textContent='Collapse';
+                  }else{
+                    container.classList.add('summary-collapsed');
+                    container.classList.remove('summary-expanded');
+                    btn.textContent='Expand';
+                  }
+                });
+              }
+              el('xAxisSelect').addEventListener('change',updateChart);
+              el('yAxisSelect').addEventListener('change',updateChart);
+              el('downloadChartBtn').addEventListener('click',downloadChart);
+              const cards=document.querySelectorAll('.chart-type-card');
+              cards.forEach(card=>{
+                card.addEventListener('click',function(){
+                  cards.forEach(c=>c.classList.remove('active'));
+                  this.classList.add('active');
+                  currentChartType=this.dataset.chartType;
+                  updateChart();
+                });
+              });
+            }
+            renderResult(resultData);
+            if(json.token){
+              history.pushState({},'','?id='+json.token);
+            }
+          }
+        }catch(err){
+          console.error('Query failed',err);
+          const resultsArea=el('resultsArea');
+          if(resultsArea){
+            resultsArea.innerHTML=`<div class="section-card"><div class="alert alert-danger"><strong>Network Error:</strong> Unable to complete the request. Please check your connection and try again.</div></div>`;
+          }
+        }finally{
+          genBtn.disabled=false;
+          genBtn.innerHTML=originalText;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
