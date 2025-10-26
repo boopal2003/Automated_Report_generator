@@ -7,15 +7,15 @@
 ## Overview
 
 **Automated Report Generator** is a Flask-based web application that leverages **Large Language Models (LLMs)** to understand workflow-related questions and generate structured reports from multiple database tables.  
-It allows users to query complex workflow data in plain English and receive both **human-readable summaries** and **machine-parsable (JSON)** outputs — all driven by AI reasoning.
+It allows users to query complex workflow data in plain English and receive both **human-readable summaries** and **machine-parsable (JSON)** outputs all driven by AI reasoning.
 
 ---
 
 ## Demo 
 
-[Link](https://drive.google.com/file/d/1hs7BtPKkWfl3uwdD-2WRHKOcwWzPvlPK/view?usp=sharing)
+***[Link↗](https://drive.google.com/file/d/1hs7BtPKkWfl3uwdD-2WRHKOcwWzPvlPK/view?usp=sharing)***
 
-![Report Generator UI](https://drive.google.com/file/d/1L4hR38aanSfqMQ6UBhsjBab-wKMqgsqn/view?usp=sharing)  
+![Report Generator UI](https://github.com/boopal2003/Automated_Report_generator/blob/main/UI%20image)  
 > _A clean, minimal interface for generating intelligent workflow summaries._
 
 ---
