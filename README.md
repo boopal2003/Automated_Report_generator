@@ -1,6 +1,6 @@
 # Automated Report Generator (AI-Powered Workflow Summarizer)
 
-> **A smart, AI-powered reporting system that converts natural language questions into detailed workflow reports — complete with reasoning, provenance, and database traceability.**
+> **A smart, AI-powered reporting system that converts natural language questions into detailed workflow reports, complete with reasoning, provenance, and database traceability.**
 
 ---
 
@@ -53,38 +53,6 @@ Produces both **Markdown** and **JSON** outputs for end-users and downstream app
 | **Deployment** | Windows-based / Local development |
 
 ---
-
-## Project Structure
-report_gen/
-│
-├── app.py # Flask app entry point
-├── config.py # Configuration loader
-├── db.py # Database connector
-├── extract_schema.py # Schema extraction logic
-├── llm.py # LLM reasoning + summarization
-│
-├── prompts/
-│ ├── system_prompt.example # Public-safe prompt
-│ ├── sql_examples.txt # Example SQL patterns
-│ └── schema.txt # Sample schema definitions
-│
-├── templates/
-│ └── index.html # Web UI template
-│
-├── tests/
-│ ├── test_api_key.py
-│ ├── test_db_conn.py
-│ └── init.py
-│
-├── utils/
-│ ├── logger.py
-│ └── sql_validator.py
-│
-├── requirements.txt
-├── run_server.py
-├── run_server.bat
-└── README.md
-
 
 ## How It Works
 
